@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MaiTuMap — Surfacing Report</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ─── demo rig (not part of the product UI) ─────────────────────── -->
+  <aside class="rig">
+    <h1 class="rig__title">MaiTuMap<span>prototype rig</span></h1>
+    <p class="rig__note">Everything to the right is the product. Everything here is scaffolding so you can force any branch.</p>
+
+    <div class="rig__group">
+      <label class="rig__label">Rain reading at Buona Vista</label>
+      <div class="seg" id="scenarioSeg">
+        <button data-sc="light">Light<br>6 min</button>
+        <button data-sc="moderate" class="is-on">Moderate<br>26 min</button>
+        <button data-sc="heavy">Heavy<br>55 min</button>
+      </div>
+      <p class="rig__hint" id="scenarioHint"></p>
+    </div>
+
+    <div class="rig__group">
+      <label class="rig__label">Clock speed</label>
+      <div class="seg" id="speedSeg">
+        <button data-ms="420">1× demo</button>
+        <button data-ms="150" class="is-on">3× demo</button>
+        <button data-ms="40">fast-forward</button>
+      </div>
+      <p class="rig__hint">One simulated minute per tick. Real journey is 45 min.</p>
+    </div>
+
+    <div class="rig__group">
+      <button class="rig__reset" id="resetBtn">↺ Reset journey</button>
+    </div>
+
+    <dl class="rig__state" id="rigState"></dl>
+  </aside>
+
+  <!-- ─── the phone ──────────────────────────────────────────────────── -->
+  <div class="phone">
+    <div class="phone__screen">
+
+      <header class="statusbar">
+        <span class="statusbar__time" id="clock">18:42</span>
+        <span class="statusbar__icons">
+          <svg viewBox="0 0 18 12" width="16" height="12" fill="currentColor" aria-hidden="true"><rect x="0" y="7" width="3" height="5" rx="0.5"/><rect x="5" y="4" width="3" height="8" rx="0.5"/><rect x="10" y="1" width="3" height="11" rx="0.5"/></svg>
+          <svg viewBox="0 0 16 12" width="15" height="12" fill="currentColor" aria-hidden="true"><path d="M8 10.2a1.1 1.1 0 100 2.2 1.1 1.1 0 000-2.2zM4.8 7.4a4.6 4.6 0 016.4 0l-1.3 1.4a2.8 2.8 0 00-3.8 0zM2 4.6a8.4 8.4 0 0112 0L12.7 6a6.6 6.6 0 00-9.4 0z"/></svg>
+          <svg viewBox="0 0 25 12" width="24" height="12" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="20" height="11" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="currentColor"/><rect x="21.5" y="4" width="2" height="4" rx="1" fill="currentColor"/></svg>
+        </span>
+      </header>
+
+      <div class="notif" id="notif" hidden>
+        <div class="notif__icon">☂️</div>
+        <div class="notif__body">
+          <strong id="notifTitle"></strong>
+          <span id="notifText"></span>
+        </div>
+      </div>
+
+      <div class="modalScrim" id="modalScrim" hidden></div>
+      <div class="modal" id="reportModal" hidden>
+        <div class="modal__grabber"></div>
+        <button class="modal__close" id="reportClose" aria-label="Close">✕</button>
+        <p class="eyebrow">Surfacing report · Buona Vista</p>
+        <h2 class="h1" id="reportHead"></h2>
+        <p class="sub" id="reportBlurb"></p>
+
+        <div class="verdict" id="verdict">
+          <p class="verdict__kicker" id="verdictKicker"></p>
+          <p class="verdict__line" id="verdictLine"></p>
+        </div>
+
+        <div id="reportActions" class="actions"></div>
+
+        <p class="evidence__label">Why</p>
+
+        <div class="radar">
+          <canvas id="radarCanvas"></canvas>
+          <div class="radar__chip" id="radarChip"></div>
+        </div>
+
+        <div class="readout">
+          <div><span class="readout__k">Ends in</span><span class="readout__v" id="roEnds"></span></div>
+          <div><span class="readout__k">Intensity</span><span class="readout__v" id="roIntensity"></span></div>
+          <div><span class="readout__k">You surface</span><span class="readout__v" id="roSurface"></span></div>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline__bars" id="tlBars"></div>
+          <div class="timeline__axis"><span>now</span><span>+30m</span><span>+60m</span></div>
+        </div>
+      </div>
+
+      <main class="views" id="views">
+
+        <!-- 0 · iOS-style home screen ---------------------------------->
+        <section class="view iosHome" data-view="iosHome">
+          <div class="iosHome__grid">
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#5AC8FA">💬</span><span class="appIcon__label">Messages</span></div>
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#8E8E93">📷</span><span class="appIcon__label">Camera</span></div>
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#FF9500">🖼️</span><span class="appIcon__label">Photos</span></div>
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#34C759">📝</span><span class="appIcon__label">Notes</span></div>
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#FF3B30">✉️</span><span class="appIcon__label">Mail</span></div>
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#1C1C1E">⏱️</span><span class="appIcon__label">Clock</span></div>
+            <div class="appIcon"><span class="appIcon__glyph" style="background:#8E8E93">⚙️</span><span class="appIcon__label">Settings</span></div>
+            <button class="appIcon" id="maituIcon">
+              <span class="appIcon__glyph appIcon__glyph--maitu">
+                <svg class="logoMark" viewBox="0 0 48 56" fill="none" aria-hidden="true">
+                  <path d="M24 3 L43 10.5 V26.5 C43 39 34 48.5 24 53 C14 48.5 5 39 5 26.5 V10.5 Z" stroke="#2E6DA4" stroke-width="3.4" stroke-linejoin="round"/>
+                  <path d="M24 17 C19.5 17 16 20.6 16 25 C16 30.5 24 39 24 39 C24 39 32 30.5 32 25 C32 20.6 28.5 17 24 17 Z" stroke="#E3A857" stroke-width="3" stroke-linejoin="round"/>
+                  <circle cx="24" cy="25" r="3.4" stroke="#E3A857" stroke-width="3"/>
+                </svg>
+              </span>
+              <span class="appIcon__label">MaiTuMap</span>
+            </button>
+          </div>
+
+          <div class="dock">
+            <span class="dock__icon" style="background:#34C759">📞</span>
+            <span class="dock__icon" style="background:#1C1C1E">🌐</span>
+            <span class="dock__icon" style="background:#FF9500">🎵</span>
+            <span class="dock__icon" style="background:#5AC8FA">📅</span>
+          </div>
+
+          <button class="homeNotif" id="homeNotif" hidden>
+            <span class="homeNotif__icon">
+              <svg viewBox="0 0 48 56" fill="none" aria-hidden="true">
+                <path d="M24 3 L43 10.5 V26.5 C43 39 34 48.5 24 53 C14 48.5 5 39 5 26.5 V10.5 Z" stroke="#2E6DA4" stroke-width="3.4" stroke-linejoin="round"/>
+                <path d="M24 17 C19.5 17 16 20.6 16 25 C16 30.5 24 39 24 39 C24 39 32 30.5 32 25 C32 20.6 28.5 17 24 17 Z" stroke="#E3A857" stroke-width="3" stroke-linejoin="round"/>
+                <circle cx="24" cy="25" r="3.4" stroke="#E3A857" stroke-width="3"/>
+              </svg>
+            </span>
+            <span class="homeNotif__body">
+              <span class="homeNotif__meta"><strong>MaiTuMap</strong><span>now</span></span>
+              <span class="homeNotif__title" id="homeNotifTitle"></span>
+              <span class="homeNotif__text" id="homeNotifText"></span>
+            </span>
+          </button>
+        </section>
+
+        <!-- 0.5 · trip planner ------------------------------------------>
+        <section class="view" data-view="planner" hidden>
+          <p class="eyebrow">Where to?</p>
+          <h2 class="h1">Plan this trip</h2>
+          <p class="sub">One saved route for this prototype — configure how you want it read.</p>
+
+          <div class="route-row">
+            <div class="route-row__pt"><span class="route-row__k">From</span><span class="route-row__v">COM3, campus</span></div>
+            <span class="route-row__swap">⇄</span>
+            <div class="route-row__pt"><span class="route-row__k">To</span><span class="route-row__v">Blk 505, home</span></div>
+          </div>
+
+          <div class="rig__group">
+            <label class="rig__label">Urgency</label>
+            <div class="seg" id="urgencySeg">
+              <button data-urgency="relaxed">Relaxed</button>
+              <button data-urgency="normal" class="is-on">Normal</button>
+              <button data-urgency="urgent">Urgent</button>
+            </div>
+            <p class="rig__hint">How much time you can spare shifts when we tell you to push through vs. wait.</p>
+          </div>
+
+          <div class="rig__group">
+            <label class="rig__label">Depart at</label>
+            <input class="time-input" type="time" id="departInput" value="18:42">
+          </div>
+
+          <div class="map-teaser" id="mapTeaser"></div>
+
+          <button class="btn btn--primary" id="plannerContinueBtn">Continue</button>
+        </section>
+
+        <!-- 1 · saved journey ---------------------------------------->
+        <section class="view" data-view="journey" hidden>
+          <p class="eyebrow">Saved route</p>
+          <h2 class="h1">Home from campus</h2>
+          <p class="sub" id="journeyMeta"></p>
+          <button class="editTrip" id="editTripBtn">Edit trip · urgency &amp; departure time</button>
+
+          <ol class="legs" id="legList"></ol>
+
+          <div class="callout">
+            <span class="callout__dot"></span>
+            <p><strong>2 exposed points</strong> on this route. MaiTuMap reads the rain area over Buona Vista and reports to you <strong id="leadLabel"></strong> before you surface there — plus a quick check before the open stretch home.</p>
+          </div>
+
+          <button class="btn btn--primary" id="startBtn">Start journey</button>
+        </section>
+
+        <!-- 2 · in transit ------------------------------------------->
+        <section class="view" data-view="transit" hidden>
+          <div class="sonar">
+            <div class="sonar__sweep"></div>
+            <div class="sonar__core" id="sonarCore">—</div>
+          </div>
+          <p class="eyebrow" id="transitState">Submerged</p>
+          <h2 class="h1" id="transitLeg"></h2>
+          <p class="sub" id="transitSub"></p>
+
+          <div class="bar"><div class="bar__fill" id="transitBar"></div></div>
+          <p class="mono dim" id="transitEta"></p>
+
+          <ol class="legs legs--mini" id="legListMini"></ol>
+
+          <div class="quickcheck" id="quickCheck" hidden>
+            <p class="quickcheck__kicker" id="qcKicker"></p>
+            <p class="quickcheck__line" id="qcLine"></p>
+            <div id="qcActions" class="actions"></div>
+          </div>
+
+          <button class="pill" id="reportPill" hidden>⚠️ Rain report waiting — tap to view</button>
+        </section>
+
+        <!-- 4 · detour / wait ---------------------------------------->
+        <section class="view" data-view="detour" hidden>
+          <p class="eyebrow" id="detourEyebrow">Waiting it out</p>
+          <h2 class="h1" id="detourTitle"></h2>
+          <p class="sub" id="detourSub"></p>
+
+          <div class="count">
+            <div class="count__ring"><svg viewBox="0 0 120 120"><circle class="count__track" cx="60" cy="60" r="52"/><circle class="count__prog" id="countProg" cx="60" cy="60" r="52"/></svg>
+              <div class="count__num"><strong id="countNum">--</strong><span>min left</span></div>
+            </div>
+          </div>
+
+          <ul class="check" id="checkList"></ul>
+
+          <p class="mono dim" id="detourFoot"></p>
+          <button class="btn btn--ghost" id="skipWaitBtn">Leave now anyway</button>
+        </section>
+
+        <!-- 5 · all clear -------------------------------------------->
+        <section class="view" data-view="resume" hidden>
+          <div class="clear">☀︎</div>
+          <p class="eyebrow">All clear</p>
+          <h2 class="h1">Rain has passed Buona Vista</h2>
+          <p class="sub" id="resumeSub"></p>
+          <button class="btn btn--primary" id="resumeBtn">Resume journey</button>
+        </section>
+
+        <!-- 6 · arrived ---------------------------------------------->
+        <section class="view" data-view="arrived" hidden>
+          <div class="clear">🏠</div>
+          <p class="eyebrow">Arrived</p>
+          <h2 class="h1" id="arrivedHead">You're home, dry</h2>
+          <p class="sub" id="arrivedSub"></p>
+          <dl class="summary" id="summary"></dl>
+          <button class="btn btn--ghost" id="againBtn">Run it again</button>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/radar.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
